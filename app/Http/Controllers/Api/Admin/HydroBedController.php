@@ -18,16 +18,12 @@ class HydroBedController extends Controller
     {
         $admin = $request->user();
 
-        // 管理者の学校に紐づくベッド一覧を取得
-        // N+1問題を避けるため with() でクラスとセンサーをロード
         $beds = HydroBed::with(['class', 'sensors'])
             ->whereHas('class', function ($query) use ($admin) {
-                // Adminモデルのschoolリレーション修正済み前提
                 $query->where('school_id', $admin->school_id);
             })
             ->get();
 
-        // API仕様書の形式に整形
         $response = $beds->map(function ($bed) {
             $sensor = $bed->sensors->first();
             return [
@@ -37,6 +33,7 @@ class HydroBedController extends Controller
                 'name' => $bed->name,
                 'device_id' => $sensor ? $sensor->device_id : null,
                 'status' => $bed->status,
+                'location' => $bed->location, // ▼ 追加: 一覧にも場所を含める
             ];
         });
 
@@ -53,6 +50,7 @@ class HydroBedController extends Controller
             'class_id' => 'required|exists:classes,id',
             'name' => 'required|string|max:50',
             'device_id' => 'required|string|max:100',
+            'location' => 'nullable|string|max:100', // ▼ 追加: バリデーション
         ]);
 
         $result = DB::transaction(function () use ($request) {
@@ -60,6 +58,7 @@ class HydroBedController extends Controller
                 'class_id' => $request->class_id,
                 'name' => $request->name,
                 'status' => 'standby',
+                'location' => $request->location, // ▼ 追加: DB保存
             ]);
 
             Sensor::create([
@@ -72,15 +71,20 @@ class HydroBedController extends Controller
             return $bed;
         });
 
+        // ▼ 修正: フロントエンドの表示更新に必要な全データを返す
         return response()->json([
             'id' => $result->id,
+            'class_id' => $result->class_id,     // 追加
             'name' => $result->name,
+            'device_id' => $request->device_id,  // 追加
+            'location' => $result->location,     // 追加
+            'status' => $result->status,         // 追加
             'created_at' => $result->created_at,
         ], 201);
     }
 
     /**
-     * ベッド情報の更新 (修正・削除対応)
+     * ベッド情報の更新
      * PUT /api/v1/admin/hydro_beds/{id}
      */
     public function update(Request $request, $id)
@@ -88,12 +92,12 @@ class HydroBedController extends Controller
         $request->validate([
             'name' => 'required|string|max:50',
             'device_id' => 'required|string|max:100',
+            'location' => 'nullable|string|max:100', // ▼ 追加
             'status' => 'nullable|string|in:active,standby',
         ]);
 
         $admin = $request->user();
 
-        // 権限チェック付きで取得
         $bed = HydroBed::where('id', $id)
             ->whereHas('class', function ($query) use ($admin) {
                 $query->where('school_id', $admin->school_id);
@@ -102,13 +106,12 @@ class HydroBedController extends Controller
             ->firstOrFail();
 
         $updatedBed = DB::transaction(function () use ($bed, $request) {
-            // ベッド更新
             $bed->update([
                 'name' => $request->name,
+                'location' => $request->location, // ▼ 追加: 更新処理
                 'status' => $request->status ?? $bed->status,
             ]);
 
-            // センサー更新
             $sensor = $bed->sensors->first();
             if ($sensor) {
                 $sensor->update(['device_id' => $request->device_id]);
@@ -123,10 +126,13 @@ class HydroBedController extends Controller
             return $bed;
         });
 
+        // ▼ 修正: 更新後の完全なデータを返す
         return response()->json([
             'id' => $updatedBed->id,
+            'class_id' => $updatedBed->class_id, // 追加
             'name' => $updatedBed->name,
             'status' => $updatedBed->status,
+            'location' => $updatedBed->location,  // 追加
             'device_id' => $request->device_id,
         ]);
     }
