@@ -10,14 +10,20 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('todo_items', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('todo_template_id')->constrained('todo_templates')->onDelete('cascade')->comment('テンプレートID');
-        $table->string('content', 255)->comment('作業内容');
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('todo_items', function (Blueprint $table) {
+            $table->id();
+            // ▼ 修正: テンプレートIDではなく、クラスIDに紐付ける形に変更
+            $table->foreignId('class_id')->constrained('classes')->onDelete('cascade')->comment('クラスID');
+            
+            $table->string('content', 255)->comment('作業内容');
+            
+            // ▼ 追加: 完了フラグを追加
+            $table->boolean('is_completed')->default(false)->comment('完了フラグ');
+            
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

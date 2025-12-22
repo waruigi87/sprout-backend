@@ -9,25 +9,28 @@ class TodoSeeder extends Seeder
 {
     public function run(): void
     {
-        // テンプレート作成
-        $templateId = DB::table('todo_templates')->insertGetId([
-            'title' => '毎日の観察ルーチン',
-            'description' => '朝の会で確認しましょう',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // 1. 紐付け先のクラスを取得（とりあえず最初のクラス）
+        $class = DB::table('classes')->first();
+        
+        // クラスがまだ作られていない場合は何もしない
+        if (!$class) {
+            return;
+        }
 
-        // 項目作成
-        $items = [
+        // 2. ToDoアイテムを登録
+        $todos = [
             '水の量は減っていないか確認する',
-            '葉っぱの色は緑色か確認する',
-            'LEDライトが点灯しているか確認する',
+            '葉っぱの色は元気か確認する',
+            '肥料を追加する（週に1回）',
         ];
 
-        foreach ($items as $item) {
+        foreach ($todos as $content) {
             DB::table('todo_items')->insert([
-                'todo_template_id' => $templateId,
-                'content' => $item,
+                // × 修正前: 'todo_template_id' => 1,
+                // ○ 修正後: クラスIDを指定し、完了フラグもセット
+                'class_id' => $class->id,
+                'content' => $content,
+                'is_completed' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

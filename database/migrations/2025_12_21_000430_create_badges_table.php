@@ -9,14 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
+        // ここに最新の定義を記述します
         Schema::create('badges', function (Blueprint $table) {
             $table->id();
-            $table->string('code', 50)->unique()->comment('バッジコード');
-            $table->string('name', 100)->comment('バッジ名');
-            $table->text('description')->nullable()->comment('説明');
-            $table->string('image_url', 255)->nullable()->comment('画像URL');
+            $table->string('name')->comment('バッジ名'); 
+            $table->string('description')->comment('説明');
+            $table->string('image_key')->comment('画像キー');
+            $table->string('condition_type')->comment('判定ロジック種類');
+            $table->integer('condition_value')->comment('達成値');
             $table->timestamps();
         });
     }

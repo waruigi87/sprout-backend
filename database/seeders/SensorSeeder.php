@@ -33,22 +33,21 @@ class SensorSeeder extends Seeder
             $temp = 22.0 + (rand(-20, 30) / 10); 
             $humidity = 50.0 + (rand(-100, 100) / 10);
 
+            // ▼▼▼ 修正箇所: type => 'temperature' を追加 ▼▼▼
             DB::table('readings')->insert([
                 'sensor_id' => $sensorId,
-                'value' => $temp, // 本来はtypeで分けるが、簡易的に温度を入れる(仕様要確認: 通常はカラムを分けるか行を分ける)
-                // ※今回の設計書では readings テーブルに type カラムがなく value だけなので
-                // 厳密には温度用センサーID、湿度用センサーIDと分けるか、
-                // readingsに typeカラムを持たせる必要があります。
-                // ここでは便宜上「温度」として登録します。
+                'value' => $temp,
+                'type' => 'temperature', // ★ここを追加しました
                 'recorded_at' => $targetTime,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // 湿度用データ（今回は同じ時刻でレコードを分ける想定）
+            // ▼▼▼ 修正箇所: type => 'humidity' を追加 ▼▼▼
              DB::table('readings')->insert([
                 'sensor_id' => $sensorId,
                 'value' => $humidity,
+                'type' => 'humidity',   // ★ここを追加しました
                 'recorded_at' => $targetTime,
                 'created_at' => now(),
                 'updated_at' => now(),
