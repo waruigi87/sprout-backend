@@ -9,7 +9,7 @@ class Quiz extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['category', 'question', 'options', 'correct_index', 'explanation'];
+    protected $fillable = ['category', 'question', 'options', 'answer_index', 'explanation'];
 
     // optionsカラムはJSONなので、自動的に配列に変換する
     protected $casts = [

@@ -59,7 +59,7 @@ class LearningController extends Controller
         $quiz = Quiz::findOrFail($request->quiz_id);
         
         // 正誤判定
-        $isCorrect = ($quiz->correct_index === $request->selected_index);
+        $isCorrect = ($quiz->answer_index === $request->selected_index);
 
         // 回答履歴を保存
         QuizAnswer::create([
@@ -70,7 +70,7 @@ class LearningController extends Controller
 
         return response()->json([
             'is_correct' => $isCorrect,
-            'correct_answer_index' => $quiz->correct_index,
+            'correct_answer_index' => $quiz->answer_index,
             'explanation' => $quiz->explanation,
         ]);
     }
