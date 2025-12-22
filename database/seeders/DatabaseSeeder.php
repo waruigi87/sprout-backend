@@ -6,24 +6,22 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
-            // 1. マスタ系
             SchoolSeeder::class,
             CropSeeder::class,
             BadgeSeeder::class,
+            
+            // ▼ 先にクラスを作らないと、ToDoを紐付けられません
+            ClassSeeder::class,  // ← ここに移動！
+            
             QuizSeeder::class,
+
+            // ▼ クラスが存在した状態で実行する必要があります
             TodoSeeder::class,
 
-            // 2. 学校依存系
             AdminSeeder::class,
-            ClassSeeder::class,
-
-            // 3. 運用データ系
             HydroBedSeeder::class,
             SensorSeeder::class,
         ]);
