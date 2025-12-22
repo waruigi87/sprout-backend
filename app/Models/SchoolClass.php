@@ -37,4 +37,12 @@ class SchoolClass extends Authenticatable
     {
         return $this->hasMany(HydroBed::class, 'class_id');
     }
+
+
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'badge_grants', 'class_id', 'badge_id')
+                    ->withPivot('granted_at')
+                    ->withTimestamps();
+    }
 }
