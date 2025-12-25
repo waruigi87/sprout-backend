@@ -53,4 +53,18 @@ class SwitchBotService
 
         return $response->json();
     }
+
+    public function getAllDevices()
+    {
+        // SSLエラー回避の設定を入れて取得
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders($this->getHeaders())
+            ->get("{$this->baseUrl}/devices");
+
+        if ($response->failed()) {
+            throw new Exception("SwitchBot API Error: " . $response->body());
+        }
+
+        return $response->json();
+    }
 }
