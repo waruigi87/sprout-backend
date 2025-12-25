@@ -48,7 +48,8 @@ Route::prefix('v1')->group(function () {
         // ↓ 'abilities' (複数形) に変更
         Route::middleware('abilities:access:write')->group(function () {
             Route::post('/classes/{id}/learning/quiz/answer', [LearningController::class, 'answer']);
-            Route::patch('/classes/{id}/todos/{todo_item_id}', [ToDoController::class, 'update']);
+            // patch を post に変更
+            Route::post('/classes/{id}/todos/{todo_item_id}', [ToDoController::class, 'update']);
         });
     });
 
