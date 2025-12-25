@@ -22,7 +22,7 @@ Route::prefix('v1')->group(function () {
 
 
     // --- 認証必須エリア ---
-    // Sanctumミドルウェアで保護
+    // Sanctumミドルウェアで保護（ログインしていれば誰でも通る）
     Route::middleware('auth:sanctum')->group(function () {
         
         // (3) ログアウト
@@ -33,21 +33,32 @@ Route::prefix('v1')->group(function () {
             return $request->user();
         });
 
-        // ▼ 追加: ダッシュボードとグラフのルート定義
-        Route::get('/classes/{id}/dashboard', [DashboardController::class, 'index']);
-        Route::get('/classes/{id}/graphs', [DashboardController::class, 'graphs']);
-
-        // (6) 本日のクイズ取得
-        Route::get('/classes/{id}/learning/today', [LearningController::class, 'today']);
+        // ▼▼ 閲覧系ルート (ゲストも生徒もOK) ▼▼
+        // ゲストトークンには 'access:read' が付与されているため、ここはアクセス可能
         
-        // (7) クイズ回答送信
-        Route::post('/classes/{id}/learning/quiz/answer', [LearningController::class, 'answer']);
+        // ダッシュボード取得
+        Route::get('/classes/{id}/dashboard', [DashboardController::class, 'index']);
+        // グラフ取得
+        Route::get('/classes/{id}/graphs', [DashboardController::class, 'graphs']);
+        // 本日のクイズ取得（問題を見るだけならゲストもOK）
+        Route::get('/classes/{id}/learning/today', [LearningController::class, 'today']);
 
-        // (8) ToDoチェック更新
-        Route::patch('/classes/{id}/todos/{todo_item_id}', [ToDoController::class, 'update']);
+
+        // ▼▼ 書き込み系ルート (生徒・先生のみOK) ▼▼
+        // ★ここが重要: 'access:write' 権限を持っていないとアクセスできないエリア
+        Route::middleware('ability:access:write')->group(function () {
+            
+            // (7) クイズ回答送信
+            Route::post('/classes/{id}/learning/quiz/answer', [LearningController::class, 'answer']);
+
+            // (8) ToDoチェック更新
+            Route::patch('/classes/{id}/todos/{todo_item_id}', [ToDoController::class, 'update']);
+
+        });
     });
 
     // 管理者専用エリア (Admin Guard)
+    // admin_token 権限が必要
     Route::middleware(['auth:sanctum', 'ability:admin_token'])->prefix('admin')->group(function () {
         
         // (9) クラス一覧取得, (10) クラス新規作成
@@ -57,13 +68,10 @@ Route::prefix('v1')->group(function () {
         Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
 
         // (11) ベッド一覧取得, (12) ベッド新規登録
-        // routes/api.php
-
-        // (11) ベッド一覧取得, (12) ベッド新規登録
         Route::get('/hydro_beds', [HydroBedController::class, 'index']);
         Route::post('/hydro_beds', [HydroBedController::class, 'store']);
 
-        // ★★★ ここに追加（詳細取得） ★★★
+        // 詳細取得
         Route::get('/hydro_beds/{id}', [HydroBedController::class, 'show']);
 
         Route::put('/hydro_beds/{id}', [HydroBedController::class, 'update']);
