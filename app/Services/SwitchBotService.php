@@ -42,11 +42,12 @@ class SwitchBotService
      */
     public function getDeviceStatus(string $deviceId)
     {
-        $response = Http::withHeaders($this->getHeaders())
+        // ▼ 修正: withOptions(['verify' => false]) を追加して、SSLエラーを回避
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders($this->getHeaders())
             ->get("{$this->baseUrl}/devices/{$deviceId}/status");
 
         if ($response->failed()) {
-            // エラーハンドリング（ログ出力など）
             throw new Exception("SwitchBot API Error: " . $response->body());
         }
 
