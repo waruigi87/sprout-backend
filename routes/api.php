@@ -57,8 +57,15 @@ Route::prefix('v1')->group(function () {
         Route::delete('/classes/{id}', [ClassController::class, 'destroy']);
 
         // (11) ベッド一覧取得, (12) ベッド新規登録
+        // routes/api.php
+
+        // (11) ベッド一覧取得, (12) ベッド新規登録
         Route::get('/hydro_beds', [HydroBedController::class, 'index']);
         Route::post('/hydro_beds', [HydroBedController::class, 'store']);
+
+        // ★★★ ここに追加（詳細取得） ★★★
+        Route::get('/hydro_beds/{id}', [HydroBedController::class, 'show']);
+
         Route::put('/hydro_beds/{id}', [HydroBedController::class, 'update']);
         Route::delete('/hydro_beds/{id}', [HydroBedController::class, 'destroy']);
 

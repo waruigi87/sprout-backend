@@ -137,6 +137,34 @@ class HydroBedController extends Controller
         ]);
     }
 
+    public function show(Request $request, $id)
+    {
+        $admin = $request->user();
+
+        // 所属校のベッドのみ取得できるように制限
+        $bed = HydroBed::with(['class', 'sensors'])
+            ->where('id', $id)
+            ->whereHas('class', function ($query) use ($admin) {
+                $query->where('school_id', $admin->school_id);
+            })
+            ->firstOrFail();
+
+        // センサーIDを取得（存在する場合）
+        $sensor = $bed->sensors->first();
+
+        // フロントエンドが期待する形式で返す
+        return response()->json([
+            'id' => $bed->id,
+            'class_id' => $bed->class_id,
+            'class_name' => $bed->class->name ?? 'Unknown',
+            'name' => $bed->name,
+            'device_id' => $sensor ? $sensor->device_id : null,
+            'status' => $bed->status,
+            'location' => $bed->location,
+            'created_at' => $bed->created_at,
+        ]);
+    }
+
     /**
      * ベッドの削除
      * DELETE /api/v1/admin/hydro_beds/{id}
