@@ -44,16 +44,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/classes/{id}/learning/today', [LearningController::class, 'today']);
 
 
-        // ▼▼ 書き込み系ルート (生徒・先生のみOK) ▼▼
-        // ★ここが重要: 'access:write' 権限を持っていないとアクセスできないエリア
-        Route::middleware('ability:access:write')->group(function () {
-            
-            // (7) クイズ回答送信
+        // Route::middleware('ability:access:write')->group(function () { 
+        // ↓ 'abilities' (複数形) に変更
+        Route::middleware('abilities:access:write')->group(function () {
             Route::post('/classes/{id}/learning/quiz/answer', [LearningController::class, 'answer']);
-
-            // (8) ToDoチェック更新
             Route::patch('/classes/{id}/todos/{todo_item_id}', [ToDoController::class, 'update']);
-
         });
     });
 

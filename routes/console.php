@@ -17,3 +17,5 @@ Schedule::command('todos:generate-weekly')->weeklyOn(1, '8:00');
 // 3. バッジ判定: 毎日深夜、または1時間に1回など
 // （ユーザー体験的には、回答直後に判定するのが理想ですが、バッチならここです）
 Schedule::command('badges:check')->hourly();
+
+Schedule::command('todos:reset')->daily();
